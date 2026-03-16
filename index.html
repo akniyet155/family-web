@@ -1,69 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Profile</title>
+    <title>Настройка профиля пары</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-900 p-5">
-    <div class="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-6">
-        <h1 class="text-2xl font-bold mb-2 text-center text-indigo-600">Ваша Анкета</h1>
-        <p class="text-sm text-slate-500 mb-6 text-center">Эту карточку будут видеть другие пары</p>
-        
+<body class="bg-gray-100 p-4">
+    <div class="max-w-md mx-auto bg-white rounded-3xl shadow-lg overflow-hidden p-6">
+        <h2 class="text-2xl font-bold text-center text-indigo-700 mb-2">Профиль пары</h2>
+        <p class="text-gray-500 text-sm text-center mb-6">Заполните данные, чтобы находить друзей</p>
+
         <div class="space-y-4">
             <div>
-                <label class="block text-sm font-semibold ml-1">Название вашей пары</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Как вас зовут?</label>
                 <input type="text" id="pair_name" placeholder="Напр: Дамир и Алия" 
-                       class="w-full border-2 rounded-xl p-3 mt-1 focus:border-indigo-500 outline-none transition">
+                       class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
             </div>
 
             <div>
-                <label class="block text-sm font-semibold ml-1">Город</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Ваш город</label>
                 <input type="text" id="city" placeholder="Алматы" 
-                       class="w-full border-2 rounded-xl p-3 mt-1 focus:border-indigo-500 outline-none transition">
+                       class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
             </div>
 
             <div>
-                <label class="block text-sm font-semibold ml-1">Наши интересы</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Интересы (через запятую)</label>
                 <input type="text" id="interests" placeholder="Настолки, горы, кино..." 
-                       class="w-full border-2 rounded-xl p-3 mt-1 focus:border-indigo-500 outline-none transition">
+                       class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
             </div>
 
             <div>
-                <label class="block text-sm font-semibold ml-1">О нас</label>
-                <textarea id="about" placeholder="Расскажите немного о себе..." 
-                       class="w-full border-2 rounded-xl p-3 mt-1 focus:border-indigo-500 outline-none transition h-24"></textarea>
+                <label class="block text-sm font-medium text-gray-700 mb-1">О вас</label>
+                <textarea id="about" placeholder="Расскажите немного о вашей паре..." 
+                          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition h-28"></textarea>
             </div>
-            
-            <button onclick="sendData()" 
-                    class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-indigo-700 active:scale-95 transition duration-150">
-                Сохранить анкету
+
+            <button onclick="sendDataToBot()" 
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-md active:scale-95 transition duration-200">
+                Сохранить в боте
             </button>
         </div>
     </div>
 
     <script>
+        // Инициализация Telegram WebApp
         let tg = window.Telegram.WebApp;
-        tg.expand();
+        tg.expand(); // Развернуть на весь экран
 
-        function sendData() {
+        function sendDataToBot() {
+            // Собираем данные из полей
             let data = {
                 pair_name: document.getElementById('pair_name').value,
                 city: document.getElementById('city').value,
                 interests: document.getElementById('interests').value,
-                about_us: document.getElementById('about').value
+                about_us: document.getElementById('about').value // Ключ 'about_us' совпадает с bot.py
             };
-            
+
+            // Простая валидация
             if (!data.pair_name || !data.city) {
-                alert("Пожалуйста, заполните хотя бы название и город!");
+                alert("Пожалуйста, укажите ваши имена и город!");
                 return;
             }
-            
+
+            // Отправляем данные боту (ВАЖНО: строка должна быть JSON)
             tg.sendData(JSON.stringify(data));
+            
+            // Закрываем окно приложения
             tg.close();
         }
     </script>
 </body>
 </html>
+
