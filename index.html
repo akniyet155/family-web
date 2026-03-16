@@ -37,18 +37,9 @@
                 <i class="fa-solid fa-address-card text-blue-500"></i> Ваша Анкета
             </h2>
             <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] font-bold opacity-40 ml-1 uppercase">Как вас зовут?</label>
-                    <input id="pair_name" type="text" placeholder="Напр: Арман и Алия" class="w-full p-4 mt-1 rounded-2xl bg-white/50 border border-gray-200 outline-none focus:border-blue-500 transition-all">
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold opacity-40 ml-1 uppercase">Ваш город</label>
-                    <input id="city" type="text" placeholder="Алматы" class="w-full p-4 mt-1 rounded-2xl bg-white/50 border border-gray-200 outline-none focus:border-blue-500 transition-all">
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold opacity-40 ml-1 uppercase">О вашей семье</label>
-                    <textarea id="about" placeholder="Любим горы, настолки и кофе..." class="w-full p-4 mt-1 rounded-2xl bg-white/50 border border-gray-200 h-28 outline-none focus:border-blue-500 transition-all"></textarea>
-                </div>
+                <input id="pair_name" type="text" placeholder="Имена (напр. Арман и Алия)" class="w-full p-4 rounded-2xl bg-white/50 border border-gray-200 outline-none focus:border-blue-500">
+                <input id="city" type="text" placeholder="Ваш город" class="w-full p-4 rounded-2xl bg-white/50 border border-gray-200 outline-none focus:border-blue-500">
+                <textarea id="about" placeholder="О вашей семье..." class="w-full p-4 rounded-2xl bg-white/50 border border-gray-200 h-28 outline-none focus:border-blue-500"></textarea>
             </div>
             <button onclick="saveProfile()" class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">
                 Сохранить анкету
@@ -59,31 +50,27 @@
     <main id="tab-feed" class="tab-content p-4 space-y-4">
         <div class="flex justify-between items-center px-2">
             <h2 class="text-lg font-bold">Лента встреч</h2>
-            <button onclick="loadEvents()" class="p-2 text-blue-500 active:rotate-180 transition-all">
-                <i class="fa-solid fa-arrows-rotate"></i>
-            </button>
+            <button onclick="loadEvents()" class="p-2 text-blue-500"><i class="fa-solid fa-arrows-rotate"></i></button>
         </div>
         <div id="events-list" class="space-y-4">
-            <div class="text-center py-20 opacity-30 italic">Загрузка ленты...</div>
+            <div class="text-center py-20 opacity-30 italic">Нажмите обновить...</div>
         </div>
     </main>
 
     <main id="tab-create" class="tab-content p-4">
         <div class="glass p-6 rounded-3xl border border-green-500/20 shadow-sm">
-            <h2 class="text-lg font-bold mb-5 flex items-center gap-2">
-                <i class="fa-solid fa-calendar-plus text-green-500"></i> Новое событие
-            </h2>
+            <h2 class="text-lg font-bold mb-5">➕ Новое событие</h2>
             <div class="space-y-4">
-                <input id="ev_title" type="text" placeholder="Название (напр: Поход в кино)" class="w-full p-4 rounded-2xl bg-white/50 border border-gray-200 outline-none focus:border-green-500">
-                <textarea id="ev_desc" placeholder="Детали встречи..." class="w-full p-4 rounded-2xl bg-white/50 border border-gray-200 h-32 outline-none focus:border-green-500"></textarea>
+                <input id="ev_title" type="text" placeholder="Название встречи" class="w-full p-4 rounded-2xl border outline-none focus:border-green-500">
+                <textarea id="ev_desc" placeholder="Описание встречи..." class="w-full p-4 rounded-2xl border h-32 outline-none focus:border-green-500"></textarea>
             </div>
-            <button onclick="createEvent()" class="w-full mt-8 bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">
-                Опубликовать встречу
+            <button onclick="createEvent()" class="w-full mt-8 bg-green-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">
+                Опубликовать
             </button>
         </div>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 glass border-t border-gray-100 flex justify-around py-3 z-50">
+    <nav class="fixed bottom-0 left-0 right-0 glass border-t flex justify-around py-3 z-50">
         <button onclick="switchTab('profile')" id="btn-profile" class="flex flex-col items-center gap-1 active-nav px-4">
             <i class="fa-solid fa-circle-user text-xl"></i><span class="text-[9px] font-bold uppercase">Анкета</span>
         </button>
@@ -98,22 +85,23 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.ready();
 
+        // Ссылка на твой туннель
         const API_URL = "https://floppy-ravens-yell.loca.lt";
         const userId = tg.initDataUnsafe.user?.id || 0;
 
-        // Загрузка профиля из базы
+        // Загрузка профиля
         async function loadProfile() {
             try {
                 const res = await fetch(`${API_URL}/get_profile/${userId}`);
+                if (!res.ok) throw new Error('Profile not found');
                 const data = await res.json();
                 if (data.pair_name) {
                     document.getElementById('pair_name').value = data.pair_name;
                     document.getElementById('city').value = data.city;
                     document.getElementById('about').value = data.about_us;
                 }
-            } catch (e) { console.error("API Error:", e); }
+            } catch (e) { console.log("User new or offline"); }
         }
 
         // Сохранение профиля
@@ -135,20 +123,20 @@
                 });
                 if (res.ok) {
                     tg.HapticFeedback.notificationOccurred('success');
-                    tg.showAlert("✅ Данные сохранены!");
+                    tg.showAlert("✅ Анкета сохранена!");
+                } else {
+                    tg.showAlert("❌ Сервер отклонил запрос");
                 }
-            } catch (e) { tg.showAlert("❌ Ошибка соединения с сервером"); }
+            } catch (e) { 
+                tg.showAlert("❌ Ошибка: " + e.message); 
+            }
         }
 
-        // Загрузка Ленты
+        // Лента
         async function loadEvents() {
-            const city = document.getElementById('city').value || "";
+            const city = document.getElementById('city').value || "Алматы";
             const list = document.getElementById('events-list');
-            
-            if (!city) {
-                list.innerHTML = `<div class="p-10 text-center opacity-50">Сначала укажите ваш город в анкете</div>`;
-                return;
-            }
+            list.innerHTML = "Загрузка...";
 
             try {
                 const res = await fetch(`${API_URL}/get_events/${encodeURIComponent(city)}`);
@@ -156,30 +144,25 @@
                 list.innerHTML = "";
                 
                 if (events.length === 0) {
-                    list.innerHTML = `<div class="p-10 text-center opacity-50">В городе ${city} пока нет встреч. Будьте первыми!</div>`;
+                    list.innerHTML = `<div class="p-10 text-center opacity-50">В городе ${city} нет встреч.</div>`;
                     return;
                 }
 
                 events.forEach(ev => {
                     const card = document.createElement('div');
-                    card.className = "glass p-5 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden";
+                    card.className = "glass p-5 rounded-3xl border border-gray-100 shadow-sm mb-4";
                     card.innerHTML = `
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-bold text-blue-600 text-lg">${ev.title}</h3>
-                            <span class="text-[10px] bg-blue-50 text-blue-500 px-2 py-1 rounded-full font-bold">Active</span>
-                        </div>
-                        <p class="text-[11px] text-gray-400 mb-3"><i class="fa-solid fa-users mr-1"></i> Семья: ${ev.pair_name}</p>
-                        <p class="text-sm text-gray-600 leading-relaxed mb-5">${ev.description}</p>
-                        <button onclick="joinEvent(${ev.id})" class="w-full bg-gray-900 text-white text-xs font-bold py-3 rounded-2xl active:scale-95 transition-all">
-                            🤝 Присоединиться
-                        </button>
+                        <h3 class="font-bold text-blue-600 text-lg">${ev.title}</h3>
+                        <p class="text-[11px] text-gray-400 mb-2">Семья: ${ev.pair_name}</p>
+                        <p class="text-sm text-gray-600 mb-4">${ev.description}</p>
+                        <button onclick="joinEvent(${ev.id})" class="w-full bg-blue-600 text-white text-xs font-bold py-3 rounded-2xl active:scale-95 transition-all">Присоединиться</button>
                     `;
                     list.appendChild(card);
                 });
-            } catch (e) { list.innerHTML = "Ошибка загрузки."; }
+            } catch (e) { list.innerHTML = "Ошибка загрузки ленты."; }
         }
 
-        // Создание встречи
+        // Создать встречу
         async function createEvent() {
             const data = {
                 user_id: userId,
@@ -188,8 +171,6 @@
                 city: document.getElementById('city').value
             };
 
-            if (!data.title || !data.city) return tg.showAlert("Заполните название и город!");
-
             try {
                 const res = await fetch(`${API_URL}/create_event`, {
                     method: 'POST',
@@ -197,15 +178,12 @@
                     body: JSON.stringify(data)
                 });
                 if (res.ok) {
-                    tg.showAlert("🚀 Встреча опубликована!");
-                    document.getElementById('ev_title').value = "";
-                    document.getElementById('ev_desc').value = "";
+                    tg.showAlert("🚀 Встреча создана!");
                     switchTab('feed');
                 }
             } catch (e) { tg.showAlert("Ошибка при создании"); }
         }
 
-        // Заявка "Присоединиться"
         async function joinEvent(eventId) {
             try {
                 const res = await fetch(`${API_URL}/join_request`, {
@@ -213,30 +191,21 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ event_id: eventId, user_id: userId })
                 });
-                if (res.ok) {
-                    tg.HapticFeedback.impactOccurred('medium');
-                    tg.showAlert("📨 Заявка отправлена автору в Telegram!");
-                }
+                if (res.ok) tg.showAlert("📨 Заявка отправлена автору!");
             } catch (e) { tg.showAlert("Ошибка API"); }
         }
 
-        // Навигация
         function switchTab(tabId) {
-            tg.HapticFeedback.selectionChanged();
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.add('active');
-            
             document.querySelectorAll('nav button').forEach(b => {
                 b.classList.remove('active-nav');
                 b.classList.add('text-gray-400');
             });
             document.getElementById('btn-' + tabId).classList.add('active-nav');
-            document.getElementById('btn-' + tabId).classList.remove('text-gray-400');
-
             if (tabId === 'feed') loadEvents();
         }
 
-        // Старт
         window.onload = loadProfile;
     </script>
 </body>
