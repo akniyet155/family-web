@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Family Mini App</title>
+    <title>FamilyHub App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -12,7 +12,7 @@
             background-color: var(--tg-theme-bg-color, #ffffff); 
             color: var(--tg-theme-text-color, #222222); 
         }
-        .active-tab { color: #3b82f6 ! dominance; }
+        .active-tab { color: #3b82f6 !important; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .glass { 
@@ -31,25 +31,25 @@
 
     <main id="tab-home" class="tab-content active p-4 space-y-4">
         <div class="glass p-5 rounded-2xl shadow-xl border border-blue-500/20">
-            <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-user-pen text-blue-500"></i> Данные семьи
+            <h2 id="header-title" class="text-lg font-semibold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-user-pen text-blue-500"></i> Ваша Анкета
             </h2>
             <div class="space-y-4">
                 <div>
-                    <label class="text-xs font-semibold opacity-50 ml-1">КАК ВАС ЗОВУТ?</label>
-                    <input id="pair_name" type="text" placeholder="Напр: Дамир и Алия" class="w-full p-4 mt-1 rounded-xl bg-black/10 border border-white/5 outline-none focus:border-blue-500 transition-all">
+                    <label class="text-xs font-semibold opacity-50 ml-1 uppercase">Как вас зовут?</label>
+                    <input id="pair_name" type="text" placeholder="Напр: Дамир и Алия" class="w-full p-4 mt-1 rounded-xl bg-black/5 border border-white/10 outline-none focus:border-blue-500 transition-all">
                 </div>
                 <div>
-                    <label class="text-xs font-semibold opacity-50 ml-1">ГОРОД</label>
-                    <input id="city" type="text" placeholder="Ваш город" class="w-full p-4 mt-1 rounded-xl bg-black/10 border border-white/5 outline-none focus:border-blue-500 transition-all">
+                    <label class="text-xs font-semibold opacity-50 ml-1 uppercase">Город</label>
+                    <input id="city" type="text" placeholder="Ваш город" class="w-full p-4 mt-1 rounded-xl bg-black/5 border border-white/10 outline-none focus:border-blue-500 transition-all">
                 </div>
                 <div>
-                    <label class="text-xs font-semibold opacity-50 ml-1">О НАС</label>
-                    <textarea id="about" placeholder="Расскажите о своих интересах..." class="w-full p-4 mt-1 rounded-xl bg-black/10 border border-white/5 h-28 outline-none focus:border-blue-500 transition-all"></textarea>
+                    <label class="text-xs font-semibold opacity-50 ml-1 uppercase">О нас</label>
+                    <textarea id="about" placeholder="Расскажите о себе..." class="w-full p-4 mt-1 rounded-xl bg-black/5 border border-white/10 h-28 outline-none focus:border-blue-500 transition-all"></textarea>
                 </div>
             </div>
             <button onclick="sendDataToBot()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transform active:scale-95 transition-all">
-                Сохранить анкету
+                Сохранить изменения
             </button>
         </div>
     </main>
@@ -57,19 +57,7 @@
     <main id="tab-feed" class="tab-content p-4 text-center py-20">
         <i class="fa-solid fa-layer-group text-6xl text-gray-400 mb-4 opacity-20"></i>
         <h2 class="text-xl font-bold">Лента встреч</h2>
-        <p class="text-gray-400 mt-2 px-6">Здесь будут отображаться семьи из вашего города.</p>
-    </main>
-
-    <main id="tab-info" class="tab-content p-4">
-        <div class="glass p-6 rounded-2xl space-y-4">
-            <h2 class="text-lg font-semibold border-b border-white/5 pb-2">Инфо</h2>
-            <p class="text-sm opacity-80 leading-relaxed">
-                Это сообщество для семейных пар, которые хотят найти новых друзей, объединяться по интересам и весело проводить время.
-            </p>
-            <div class="pt-4">
-                <p class="text-[10px] uppercase tracking-widest opacity-30">Версия 2.1 • Stable</p>
-            </div>
-        </div>
+        <p class="text-gray-400 mt-2 px-6">Здесь появятся предложения из вашего города.</p>
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 glass border-t border-white/10 px-6 py-3 flex justify-between items-center z-50">
@@ -81,10 +69,6 @@
             <i class="fa-solid fa-compass text-xl"></i>
             <span class="text-[10px] font-medium">Лента</span>
         </button>
-        <button onclick="switchTab('info')" id="btn-info" class="flex flex-col items-center gap-1 text-gray-500">
-            <i class="fa-solid fa-circle-info text-xl"></i>
-            <span class="text-[10px] font-medium">Инфо</span>
-        </button>
     </nav>
 
     <script>
@@ -92,53 +76,53 @@
         tg.expand();
         tg.ready();
 
-        // Отображаем имя пользователя из Telegram
-        const userName = tg.initDataUnsafe.user?.first_name || "Пользователь";
-        document.getElementById('user-name').innerText = userName;
+        // 1. Извлекаем данные из URL (которые прислал бот)
+        const urlParams = new URLSearchParams(window.location.search);
+        const name = decodeURIComponent(urlParams.get('name') || "");
+        const city = decodeURIComponent(urlParams.get('city') || "");
+        const about = decodeURIComponent(urlParams.get('about') || "");
 
-        function switchTab(tabId) {
-            // Вибрация при нажатии
-            tg.HapticFeedback.impactOccurred('medium');
+        // 2. Подставляем данные в поля при загрузке
+        window.onload = () => {
+            if (name) {
+                document.getElementById('pair_name').value = name;
+                document.getElementById('header-title').innerText = "Семья: " + name;
+            }
+            if (city) document.getElementById('city').value = city;
+            if (about) document.getElementById('about').value = about;
+            
+            document.getElementById('user-name').innerText = tg.initDataUnsafe.user?.first_name || "Пользователь";
+        };
 
-            // Переключение контента
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-
-            // Переключение кнопок
-            document.querySelectorAll('nav button').forEach(el => {
-                el.classList.remove('text-blue-500', 'active-tab');
-                el.classList.add('text-gray-500');
-            });
-            const activeBtn = document.getElementById('btn-' + tabId);
-            activeBtn.classList.add('active-tab', 'text-blue-500');
-            activeBtn.classList.remove('text-gray-500');
-        }
-
+        // 3. Функция отправки данных боту
         function sendDataToBot() {
-            const pair = document.getElementById('pair_name').value;
-            const city = document.getElementById('city').value;
-            const about = document.getElementById('about').value;
+            const data = {
+                pair_name: document.getElementById('pair_name').value,
+                city: document.getElementById('city').value,
+                about_us: document.getElementById('about').value
+            };
 
-            if (!pair || !city) {
-                tg.showAlert("Пожалуйста, заполните как минимум Имена и Город!");
+            if (!data.pair_name || !data.city) {
+                tg.showAlert("Заполните Имена и Город!");
                 return;
             }
 
-            const data = {
-                pair_name: pair,
-                city: city,
-                about_us: about
-            };
-
-            // Отправка данных в бот
+            tg.HapticFeedback.notificationOccurred('success');
             tg.sendData(JSON.stringify(data));
         }
 
-        // Автоматическая настройка цветов под тему Telegram
-        tg.onEvent('themeChanged', function() {
-            document.body.style.backgroundColor = tg.backgroundColor;
-            document.body.style.color = tg.textColor;
-        });
+        // Переключение вкладок
+        function switchTab(tabId) {
+            tg.HapticFeedback.impactOccurred('light');
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            
+            document.querySelectorAll('nav button').forEach(el => {
+                el.classList.remove('active-tab', 'text-blue-500');
+                el.classList.add('text-gray-500');
+            });
+            document.getElementById('btn-' + tabId).classList.add('active-tab', 'text-blue-500');
+        }
     </script>
 </body>
 </html>
