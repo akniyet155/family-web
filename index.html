@@ -1,112 +1,22 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Family App</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { background-color: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); }
-        .active-tab { color: #3b82f6; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-    </style>
-</head>
-<body class="font-sans pb-20">
+<script>
+  // Function to read URL parameters
+  function getURLParameters() {
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get("name");
+    const email = params.get("email");
+    const message = params.get("message");
+    
+    // Pre-fill the form fields
+    if (name) document.getElementById("name").value = name;
+    if (email) document.getElementById("email").value = email;
+    if (message) document.getElementById("message").value = message;
 
-    <header class="p-4 flex justify-between items-center glass sticky top-0 z-50">
-        <h1 class="text-xl font-bold text-blue-500">FamilyHub</h1>
-        <div id="user-name" class="text-sm font-medium"></div>
-    </header>
+    // Change button text
+    if (name || email || message) {
+      document.getElementById("submit-button").innerText = "Edit & Submit";
+    }
+  }
 
-    <main id="tab-home" class="tab-content active p-4 space-y-4">
-        <div class="glass p-5 rounded-2xl shadow-xl border border-blue-500/20">
-            <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-user-pen"></i> Наша Анкета
-            </h2>
-            <div class="space-y-3">
-                <input id="pair_name" type="text" placeholder="Имена (Напр: Дамир и Алия)" class="w-full p-3 rounded-xl bg-black/20 border border-white/10 outline-none focus:border-blue-500 transition-all">
-                <input id="city" type="text" placeholder="Ваш город" class="w-full p-3 rounded-xl bg-black/20 border border-white/10 outline-none focus:border-blue-500 transition-all">
-                <textarea id="about" placeholder="О нашей семье..." class="w-full p-3 rounded-xl bg-black/20 border border-white/10 h-24 outline-none focus:border-blue-500 transition-all"></textarea>
-            </div>
-            <button onclick="sendData()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transform active:scale-95 transition-all">
-                Сохранить данные
-            </button>
-        </div>
-    </main>
-
-    <main id="tab-feed" class="tab-content p-4 text-center py-20">
-        <i class="fa-solid fa-layer-group text-5xl text-gray-500 mb-4"></i>
-        <h2 class="text-xl font-bold">Лента встреч</h2>
-        <p class="text-gray-400 mt-2">Здесь скоро будут красивые карточки встреч в вашем городе!</p>
-    </main>
-
-    <main id="tab-info" class="tab-content p-4">
-        <div class="glass p-5 rounded-2xl space-y-4">
-            <h2 class="text-lg font-semibold">О проекте</h2>
-            <p class="text-sm text-gray-400">Это приложение для поиска новых друзей среди семейных пар. Мы помогаем находить общие интересы и организовывать встречи.</p>
-            <div class="border-t border-white/10 pt-4">
-                <p class="text-xs text-gray-500">Версия 2.0 (Mini App Mode)</p>
-            </div>
-        </div>
-    </main>
-
-    <nav class="fixed bottom-0 left-0 right-0 glass border-t border-white/10 px-6 py-3 flex justify-between items-center z-50">
-        <button onclick="switchTab('home')" id="btn-home" class="flex flex-col items-center gap-1 active-tab">
-            <i class="fa-solid fa-house text-xl"></i>
-            <span class="text-[10px]">Главная</span>
-        </button>
-        <button onclick="switchTab('feed')" id="btn-feed" class="flex flex-col items-center gap-1 text-gray-500">
-            <i class="fa-solid fa-compass text-xl"></i>
-            <span class="text-[10px]">Лента</span>
-        </button>
-        <button onclick="switchTab('info')" id="btn-info" class="flex flex-col items-center gap-1 text-gray-500">
-            <i class="fa-solid fa-circle-info text-xl"></i>
-            <span class="text-[10px]">Инфо</span>
-        </button>
-    </nav>
-
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
-
-        document.getElementById('user-name').innerText = tg.initDataUnsafe.user?.first_name || "Гость";
-
-        function switchTab(tabId) {
-            // Убираем активность со всех вкладок
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(el => el.classList.remove('active-tab', 'text-blue-500'));
-            document.querySelectorAll('nav button').forEach(el => el.classList.add('text-gray-500'));
-
-            // Активируем нужную
-            document.getElementById('tab-' + tabId).classList.add('active');
-            const activeBtn = document.getElementById('btn-' + tabId);
-            activeBtn.classList.add('active-tab', 'text-blue-500');
-            activeBtn.classList.remove('text-gray-500');
-
-            // Легкая вибрация при переключении
-            tg.HapticFeedback.impactOccurred('light');
-        }
-
-        function sendData() {
-            const data = {
-                pair_name: document.getElementById('pair_name').value,
-                city: document.getElementById('city').value,
-                about_us: document.getElementById('about').value
-            }; 
-            
-            if (!data.pair_name || !data.city) {
-                tg.showAlert("Пожалуйста, заполните имена и город!");
-                return;
-            }
-
-            tg.sendData(JSON.stringify(data));
-            tg.close();
-        }
-    </script>
-</body>
-</html>
+  // Call function on page load
+  window.onload = getURLParameters;
+</script>
