@@ -7,37 +7,61 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-900 p-5">
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md p-6">
-        <h1 class="text-2xl font-bold mb-4 text-center">Профиль Пары</h1>
-        <p class="text-sm text-gray-600 mb-6 text-center">Заполните данные вашей семьи</p>
+<body class="bg-slate-50 text-slate-900 p-5">
+    <div class="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-6">
+        <h1 class="text-2xl font-bold mb-2 text-center text-indigo-600">Ваша Анкета</h1>
+        <p class="text-sm text-slate-500 mb-6 text-center">Эту карточку будут видеть другие пары</p>
         
         <div class="space-y-4">
             <div>
-                <label class="block text-sm font-medium">Название пары</label>
-                <input type="text" id="pair_name" placeholder="Например: Дамир и Алия" 
-                       class="w-full border rounded-lg p-2 mt-1 focus:ring-2 focus:ring-blue-500">
+                <label class="block text-sm font-semibold ml-1">Название вашей пары</label>
+                <input type="text" id="pair_name" placeholder="Напр: Дамир и Алия" 
+                       class="w-full border-2 rounded-xl p-3 mt-1 focus:border-indigo-500 outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold ml-1">Город</label>
+                <input type="text" id="city" placeholder="Алматы" 
+                       class="w-full border-2 rounded-xl p-3 mt-1 focus:border-indigo-500 outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold ml-1">Наши интересы</label>
+                <input type="text" id="interests" placeholder="Настолки, горы, кино..." 
+                       class="w-full border-2 rounded-xl p-3 mt-1 focus:border-indigo-500 outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold ml-1">О нас</label>
+                <textarea id="about" placeholder="Расскажите немного о себе..." 
+                       class="w-full border-2 rounded-xl p-3 mt-1 focus:border-indigo-500 outline-none transition h-24"></textarea>
             </div>
             
             <button onclick="sendData()" 
-                    class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">
-                Сохранить данные
+                    class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-indigo-700 active:scale-95 transition duration-150">
+                Сохранить анкету
             </button>
         </div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Развернуть на весь экран
+        tg.expand();
 
         function sendData() {
-            let name = document.getElementById('pair_name').value;
-            if (!name) {
-                alert("Введите название!");
+            let data = {
+                pair_name: document.getElementById('pair_name').value,
+                city: document.getElementById('city').value,
+                interests: document.getElementById('interests').value,
+                about_us: document.getElementById('about').value
+            };
+            
+            if (!data.pair_name || !data.city) {
+                alert("Пожалуйста, заполните хотя бы название и город!");
                 return;
             }
-            // Отправляем данные обратно в бота
-            tg.sendData(JSON.stringify({pair_name: name}));
+            
+            tg.sendData(JSON.stringify(data));
             tg.close();
         }
     </script>
