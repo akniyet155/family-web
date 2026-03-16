@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>FamilyHub App</title>
+    <title>FamilyHub</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -12,117 +12,232 @@
             background-color: var(--tg-theme-bg-color, #ffffff); 
             color: var(--tg-theme-text-color, #222222); 
         }
-        .active-tab { color: #3b82f6 !important; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .glass { 
-            background: rgba(255, 255, 255, 0.05); 
+            background: rgba(0, 0, 0, 0.03); 
             backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border: 1px solid rgba(0, 0, 0, 0.08); 
         }
+        .active-nav { color: #2563eb !important; border-top: 2px solid #2563eb; }
     </style>
 </head>
 <body class="font-sans pb-24">
 
     <header class="p-4 flex justify-between items-center glass sticky top-0 z-50">
-        <h1 class="text-xl font-bold text-blue-500">FamilyHub</h1>
-        <div id="user-name" class="text-sm font-medium opacity-80"></div>
+        <h1 class="text-xl font-bold text-blue-600">FamilyHub</h1>
+        <div id="status-dot" class="flex items-center gap-1 text-[10px] uppercase tracking-widest text-green-500">
+            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Online
+        </div>
     </header>
 
-    <main id="tab-home" class="tab-content active p-4 space-y-4">
-        <div class="glass p-5 rounded-2xl shadow-xl border border-blue-500/20">
-            <h2 id="header-title" class="text-lg font-semibold mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-user-pen text-blue-500"></i> Ваша Анкета
+    <main id="tab-profile" class="tab-content active p-4 space-y-4">
+        <div class="glass p-6 rounded-3xl shadow-sm">
+            <h2 class="text-lg font-bold mb-5 flex items-center gap-2">
+                <i class="fa-solid fa-address-card text-blue-500"></i> Ваша Анкета
             </h2>
             <div class="space-y-4">
                 <div>
-                    <label class="text-xs font-semibold opacity-50 ml-1 uppercase">Как вас зовут?</label>
-                    <input id="pair_name" type="text" placeholder="Напр: Дамир и Алия" class="w-full p-4 mt-1 rounded-xl bg-black/5 border border-white/10 outline-none focus:border-blue-500 transition-all">
+                    <label class="text-[10px] font-bold opacity-40 ml-1 uppercase">Как вас зовут?</label>
+                    <input id="pair_name" type="text" placeholder="Напр: Арман и Алия" class="w-full p-4 mt-1 rounded-2xl bg-white/50 border border-gray-200 outline-none focus:border-blue-500 transition-all">
                 </div>
                 <div>
-                    <label class="text-xs font-semibold opacity-50 ml-1 uppercase">Город</label>
-                    <input id="city" type="text" placeholder="Ваш город" class="w-full p-4 mt-1 rounded-xl bg-black/5 border border-white/10 outline-none focus:border-blue-500 transition-all">
+                    <label class="text-[10px] font-bold opacity-40 ml-1 uppercase">Ваш город</label>
+                    <input id="city" type="text" placeholder="Алматы" class="w-full p-4 mt-1 rounded-2xl bg-white/50 border border-gray-200 outline-none focus:border-blue-500 transition-all">
                 </div>
                 <div>
-                    <label class="text-xs font-semibold opacity-50 ml-1 uppercase">О нас</label>
-                    <textarea id="about" placeholder="Расскажите о себе..." class="w-full p-4 mt-1 rounded-xl bg-black/5 border border-white/10 h-28 outline-none focus:border-blue-500 transition-all"></textarea>
+                    <label class="text-[10px] font-bold opacity-40 ml-1 uppercase">О вашей семье</label>
+                    <textarea id="about" placeholder="Любим горы, настолки и кофе..." class="w-full p-4 mt-1 rounded-2xl bg-white/50 border border-gray-200 h-28 outline-none focus:border-blue-500 transition-all"></textarea>
                 </div>
             </div>
-            <button onclick="sendDataToBot()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transform active:scale-95 transition-all">
-                Сохранить изменения
+            <button onclick="saveProfile()" class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">
+                Сохранить анкету
             </button>
         </div>
     </main>
 
-    <main id="tab-feed" class="tab-content p-4 text-center py-20">
-        <i class="fa-solid fa-layer-group text-6xl text-gray-400 mb-4 opacity-20"></i>
-        <h2 class="text-xl font-bold">Лента встреч</h2>
-        <p class="text-gray-400 mt-2 px-6">Здесь появятся предложения из вашего города.</p>
+    <main id="tab-feed" class="tab-content p-4 space-y-4">
+        <div class="flex justify-between items-center px-2">
+            <h2 class="text-lg font-bold">Лента встреч</h2>
+            <button onclick="loadEvents()" class="p-2 text-blue-500 active:rotate-180 transition-all">
+                <i class="fa-solid fa-arrows-rotate"></i>
+            </button>
+        </div>
+        <div id="events-list" class="space-y-4">
+            <div class="text-center py-20 opacity-30 italic">Загрузка ленты...</div>
+        </div>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 glass border-t border-white/10 px-6 py-3 flex justify-between items-center z-50">
-        <button onclick="switchTab('home')" id="btn-home" class="flex flex-col items-center gap-1 active-tab">
-            <i class="fa-solid fa-house text-xl"></i>
-            <span class="text-[10px] font-medium">Главная</span>
+    <main id="tab-create" class="tab-content p-4">
+        <div class="glass p-6 rounded-3xl border border-green-500/20 shadow-sm">
+            <h2 class="text-lg font-bold mb-5 flex items-center gap-2">
+                <i class="fa-solid fa-calendar-plus text-green-500"></i> Новое событие
+            </h2>
+            <div class="space-y-4">
+                <input id="ev_title" type="text" placeholder="Название (напр: Поход в кино)" class="w-full p-4 rounded-2xl bg-white/50 border border-gray-200 outline-none focus:border-green-500">
+                <textarea id="ev_desc" placeholder="Детали встречи..." class="w-full p-4 rounded-2xl bg-white/50 border border-gray-200 h-32 outline-none focus:border-green-500"></textarea>
+            </div>
+            <button onclick="createEvent()" class="w-full mt-8 bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">
+                Опубликовать встречу
+            </button>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 glass border-t border-gray-100 flex justify-around py-3 z-50">
+        <button onclick="switchTab('profile')" id="btn-profile" class="flex flex-col items-center gap-1 active-nav px-4">
+            <i class="fa-solid fa-circle-user text-xl"></i><span class="text-[9px] font-bold uppercase">Анкета</span>
         </button>
-        <button onclick="switchTab('feed')" id="btn-feed" class="flex flex-col items-center gap-1 text-gray-500">
-            <i class="fa-solid fa-compass text-xl"></i>
-            <span class="text-[10px] font-medium">Лента</span>
+        <button onclick="switchTab('feed')" id="btn-feed" class="flex flex-col items-center gap-1 text-gray-400 px-4">
+            <i class="fa-solid fa-compass text-xl"></i><span class="text-[9px] font-bold uppercase">Лента</span>
+        </button>
+        <button onclick="switchTab('create')" id="btn-create" class="flex flex-col items-center gap-1 text-gray-400 px-4">
+            <i class="fa-solid fa-plus-circle text-xl"></i><span class="text-[9px] font-bold uppercase">Создать</span>
         </button>
     </nav>
 
     <script>
-        let tg = window.Telegram.WebApp;
+        const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
 
-        // 1. Извлекаем данные из URL (которые прислал бот)
-        const urlParams = new URLSearchParams(window.location.search);
-        const name = decodeURIComponent(urlParams.get('name') || "");
-        const city = decodeURIComponent(urlParams.get('city') || "");
-        const about = decodeURIComponent(urlParams.get('about') || "");
+        const API_URL = "http://157.230.102.247:8000";
+        const userId = tg.initDataUnsafe.user?.id || 0;
 
-        // 2. Подставляем данные в поля при загрузке
-        window.onload = () => {
-            if (name) {
-                document.getElementById('pair_name').value = name;
-                document.getElementById('header-title').innerText = "Семья: " + name;
-            }
-            if (city) document.getElementById('city').value = city;
-            if (about) document.getElementById('about').value = about;
-            
-            document.getElementById('user-name').innerText = tg.initDataUnsafe.user?.first_name || "Пользователь";
-        };
+        // Загрузка профиля из базы
+        async function loadProfile() {
+            try {
+                const res = await fetch(`${API_URL}/get_profile/${userId}`);
+                const data = await res.json();
+                if (data.pair_name) {
+                    document.getElementById('pair_name').value = data.pair_name;
+                    document.getElementById('city').value = data.city;
+                    document.getElementById('about').value = data.about_us;
+                }
+            } catch (e) { console.error("API Error:", e); }
+        }
 
-        // 3. Функция отправки данных боту
-        function sendDataToBot() {
+        // Сохранение профиля
+        async function saveProfile() {
             const data = {
+                user_id: userId,
                 pair_name: document.getElementById('pair_name').value,
                 city: document.getElementById('city').value,
                 about_us: document.getElementById('about').value
             };
+            
+            if (!data.pair_name || !data.city) return tg.showAlert("Заполните Имя и Город!");
 
-            if (!data.pair_name || !data.city) {
-                tg.showAlert("Заполните Имена и Город!");
+            try {
+                const res = await fetch(`${API_URL}/save_profile`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                    tg.showAlert("✅ Данные сохранены!");
+                }
+            } catch (e) { tg.showAlert("❌ Ошибка соединения с сервером"); }
+        }
+
+        // Загрузка Ленты
+        async function loadEvents() {
+            const city = document.getElementById('city').value || "";
+            const list = document.getElementById('events-list');
+            
+            if (!city) {
+                list.innerHTML = `<div class="p-10 text-center opacity-50">Сначала укажите ваш город в анкете</div>`;
                 return;
             }
 
-            tg.HapticFeedback.notificationOccurred('success');
-            tg.sendData(JSON.stringify(data));
+            try {
+                const res = await fetch(`${API_URL}/get_events/${encodeURIComponent(city)}`);
+                const events = await res.json();
+                list.innerHTML = "";
+                
+                if (events.length === 0) {
+                    list.innerHTML = `<div class="p-10 text-center opacity-50">В городе ${city} пока нет встреч. Будьте первыми!</div>`;
+                    return;
+                }
+
+                events.forEach(ev => {
+                    const card = document.createElement('div');
+                    card.className = "glass p-5 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden";
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-blue-600 text-lg">${ev.title}</h3>
+                            <span class="text-[10px] bg-blue-50 text-blue-500 px-2 py-1 rounded-full font-bold">Active</span>
+                        </div>
+                        <p class="text-[11px] text-gray-400 mb-3"><i class="fa-solid fa-users mr-1"></i> Семья: ${ev.pair_name}</p>
+                        <p class="text-sm text-gray-600 leading-relaxed mb-5">${ev.description}</p>
+                        <button onclick="joinEvent(${ev.id})" class="w-full bg-gray-900 text-white text-xs font-bold py-3 rounded-2xl active:scale-95 transition-all">
+                            🤝 Присоединиться
+                        </button>
+                    `;
+                    list.appendChild(card);
+                });
+            } catch (e) { list.innerHTML = "Ошибка загрузки."; }
         }
 
-        // Переключение вкладок
+        // Создание встречи
+        async function createEvent() {
+            const data = {
+                user_id: userId,
+                title: document.getElementById('ev_title').value,
+                description: document.getElementById('ev_desc').value,
+                city: document.getElementById('city').value
+            };
+
+            if (!data.title || !data.city) return tg.showAlert("Заполните название и город!");
+
+            try {
+                const res = await fetch(`${API_URL}/create_event`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    tg.showAlert("🚀 Встреча опубликована!");
+                    document.getElementById('ev_title').value = "";
+                    document.getElementById('ev_desc').value = "";
+                    switchTab('feed');
+                }
+            } catch (e) { tg.showAlert("Ошибка при создании"); }
+        }
+
+        // Заявка "Присоединиться"
+        async function joinEvent(eventId) {
+            try {
+                const res = await fetch(`${API_URL}/join_request`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ event_id: eventId, user_id: userId })
+                });
+                if (res.ok) {
+                    tg.HapticFeedback.impactOccurred('medium');
+                    tg.showAlert("📨 Заявка отправлена автору в Telegram!");
+                }
+            } catch (e) { tg.showAlert("Ошибка API"); }
+        }
+
+        // Навигация
         function switchTab(tabId) {
-            tg.HapticFeedback.impactOccurred('light');
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            tg.HapticFeedback.selectionChanged();
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.add('active');
             
-            document.querySelectorAll('nav button').forEach(el => {
-                el.classList.remove('active-tab', 'text-blue-500');
-                el.classList.add('text-gray-500');
+            document.querySelectorAll('nav button').forEach(b => {
+                b.classList.remove('active-nav');
+                b.classList.add('text-gray-400');
             });
-            document.getElementById('btn-' + tabId).classList.add('active-tab', 'text-blue-500');
+            document.getElementById('btn-' + tabId).classList.add('active-nav');
+            document.getElementById('btn-' + tabId).classList.remove('text-gray-400');
+
+            if (tabId === 'feed') loadEvents();
         }
+
+        // Старт
+        window.onload = loadProfile;
     </script>
 </body>
 </html>
